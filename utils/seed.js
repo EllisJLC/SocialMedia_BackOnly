@@ -12,18 +12,15 @@ connection.once('open', async () => { // start seed
   const users = []; // initialize empty array
 
   for (let i = 0; i < 20; i++) { // create 20 entries
-    const assignments = getRandomAssignments(20);
 
     const fullName = getRandomName();
     const first = fullName.split(' ')[0];
-    const last = fullName.split(' ')[1];
-    const github = `${first}${Math.floor(Math.random() * (99 - 18 + 1) + 18)}`;
+    const username = `${first}${Math.floor(Math.random() * (99 - 18 + 1) + 18)}`;
+    const email = `${first}${Math.floor(Math.random() * (99 - 18 + 1) + 18)}` + '@gmail.com';
 
     users.push({
-      first,
-      last,
-      github,
-      assignments,
+      username,
+      email,
     });
   }
 
