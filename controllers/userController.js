@@ -4,7 +4,7 @@ const { User, Thought } = require('../models');
 module.exports = {
   getUsers(req,res) { // GET all users
     User.find()
-    .then((users) => res.json(users))
+    .then((users) => res.status(200).json(users))
     .catch((e) => res.status(500).json(e))
   },
   getOneUser(req,res) { // GET one user
@@ -13,13 +13,13 @@ module.exports = {
     .then((user) => 
       !user 
         ? res.status(404).json({message:'No user with that id'})
-        : res.json(user)
+        : res.status(200).json(user)
     )
     .catch((e)=>res.status(500).json(e))
   },
   createUser(req,res) { // POST new user
     User.create(req.body) // create new user given request body, need email and username
-    .then((user) => res.json(user))
+    .then((user) => res.status(200).json(user))
     .catch((e) => {
       console.log(e);
       return res.status(500).json(e);
@@ -67,7 +67,7 @@ module.exports = {
   removeFriend(req,res) { // DELETE friend from user friends array
     User.findOneAndUpdate(
       {_id: req.params.userId},
-      {$pull: {friends: {friendId: req.params.friendId}}},
+      {$pull: {friends: req.params.friendId}},
       {runValidators: true, new: true}
     )
     .then((user) => 
