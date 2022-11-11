@@ -2,12 +2,12 @@ const { ObjectId } = require('mongoose').Types;
 const { User, Thought } = require('../models');
 
 module.exports = {
-  getUsers(req,res) {
+  getUsers(req,res) { // GET all users
     User.find()
     .then((users) => res.json(users))
     .catch((e) => res.status(500).json(e))
   },
-  getOneUser(req,res) {
+  getOneUser(req,res) { // GET one user
     User.findOne({_id: req.params.userId})
     .selecet('-__v')
     .then((user) => 
@@ -17,7 +17,7 @@ module.exports = {
     )
     .catch((e)=>res.status(500).json(e))
   },
-  createUser(req,res) {
+  createUser(req,res) { // POST new user
     User.create(req.body) // create new user given request body, need email and username
     .then((user) => res.json(user))
     .catch((e) => {
@@ -25,7 +25,7 @@ module.exports = {
       return res.status(500).json(e);
     })
   },
-  deleteUser(req,res){
+  deleteUser(req,res){ // DELETE user
     User.findOneAndDelete({_id: req.params.userId})
     .then((user) => 
       !user
@@ -35,7 +35,7 @@ module.exports = {
     .then(() => res.json({message: 'User deleted.'}))
     .catch((e)=> res.status(500).json(e))
   },
-  updateUser(req,res) {
+  updateUser(req,res) { // PUT updated user
     User.findOneAndUpdate(
       {_id: req.params.userId},
       {$set: req.body},
@@ -51,4 +51,30 @@ module.exports = {
     )
     .catch ((e) => res.status(500).json(e));
   },
+  addFriend(req,res) { // POST new friend into user
+    User.findOneAndUpdate(
+      {id: req.params.userId},
+      {$addToSet: {friends: req.params.friendId}},
+      {runValidators:true, new:true}
+    )
+    .then((user) => 
+      !user
+        ? res.status(404).json({message: "No user of that id"})
+        : res.json(user)
+    )
+    .catch((e) => res.status(500).json(e))
+  },
+  removeFriend(req,res) { // DELETE friend from user friends array
+    User.findOneAndUpdate(
+      {_id: req.params.userId},
+      {$pull: {friends: {friendId: req.params.friendId}}},
+      {runValidators: true, new: true}
+    )
+    .then((user) => 
+      !user
+        ? res.status(404).json({message: "No user of that id"})
+        : res.json(user)
+    )
+    .catch((e) => res.status(500).json(e))
+  }
 };
