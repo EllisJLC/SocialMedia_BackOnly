@@ -8,8 +8,8 @@ module.exports = {
     .catch ((e) => res.status(500).json(e))
   },
   getOneThought(req,res) { // GET one user
-    Thought.findOne({_id: req.params.userId})
-    .selecet('-__v')
+    Thought.findOne({_id: req.params.thoughtId})
+    .select('-__v')
     .then((thought) => 
       !thought 
         ? res.status(404).json({message:'No thought with that id'})
@@ -29,7 +29,7 @@ module.exports = {
       return res.status(500).json(e);
     });
   },
-  updateThought(req,res) { // Update a thought
+  updateThought(req,res) { // PUT update a thought
     Thought.findByIdAndUpdate(
       {_id: req.params.userId},
       {$set: req.body},
@@ -45,14 +45,46 @@ module.exports = {
       .catch ((e) => res.status(500).json(e))
     );
   },
-  deleteThought (req,res) { // delete a thought
-    Thought.findOneAndDelete({_id: req.params.userId})
+  deleteThought (req,res) { // DELETE a thought
+    Thought.findById({_id: req.params.thoughtId})
+    .then((thought) => {
+      User.findByIdAndUpdate(
+        {_id: thought.userId},
+        {$pull: {thoughts: req.params.thoughtId}},
+        {new: true}
+      )
+    })
+    .then (() => Thought.findOneAndDelete({_id: req.params.thoughtId}))
     .then((thought) => 
       !thought
-        ? res.status(404).json({message: "no user with that id."})
-        : Thought.deleteMany({_id: {$in: user.thoughts}})
+        ? res.status(404).json({message: "no thought with that id."})
+        : res.json({message: 'Thought deleted.'}))
+    .catch((e) => res.status(500).json(e))
+  },
+  addReaction (req,res) { // POST new reaction into thought, given reaction in object
+    Thought.findOneAndUpdate(
+      {id: req.params.thoughtId},
+      {$push: {reactions: req.body.reaction}},
+      {runValidators:true, new:true}
     )
-    .then(() => res.json({message: 'User deleted.'}))
-    .catch((e)=> res.status(500).json(e))
+    .then((thought) => 
+      !thought
+        ? res.status(404).json({message: "No thought of that id"})
+        : res.status(200).json(thought)
+    )
+    .catch((e) => res.status(500).json(e))
+  },
+  deleteReaction(req, res) {
+    Thought.findOneAndUpdate(
+      {_id: req.params.thoughtId},
+      {$pull: {friends: req.params.reactionId}},
+      {runValidators: true, new: true}
+    )
+    .then((thought) => 
+      !thought
+        ? res.status(404).json({message: "No user of that id"})
+        : res.status(200).json(thought)
+    )
+    .catch((e) => res.status(500).json(e))
   }
 }
