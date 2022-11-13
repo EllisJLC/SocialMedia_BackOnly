@@ -24,7 +24,7 @@ Back end connections for a social media website
 
 ## Test
 
-1. Run program by inputting npm run start. 
+1. Run program by inputting npm start. 
 2. Test connections by using insomnia to send HTTPS requests.
 
 Demonstration: https://youtu.be/zp7NbP6CdrE.
